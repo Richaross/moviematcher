@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Movie Matchmaker
 
-## Getting Started
+A Tinder-style movie discovery application built with Next.js, Framer Motion, and Tailwind CSS. Users can swipe right to "like" movies (add to watchlist) and swipe left to dismiss them.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*   **Tinder-Style Swiping**: Intuitive gesture-based interface for browsing movies.
+*   **Discovery Filters**: Filter movies by Genre, Year, Rating, Runtime, and Sort Order (Popularity, Release Date, etc.) to refine your recommendations.
+*   **Infinite Scrolling**: "Load More" functionality keeps the movie suggestions coming.
+*   **Watchlist Management**: View, manage, and remove movies from your saved list.
+*   **Responsive Design**: Fully optimized for mobile and desktop experiences.
+*   **Glassmorphism UI**: Modern, sleek interface with blur effects and smooth animations.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+*   **Framework**: [Next.js](https://nextjs.org/) (App Router)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+*   **Animations**: [Framer Motion](https://www.framer.com/motion/)
+*   **State Management**: [Zustand](https://github.com/pmndrs/zustand) (with persistence)
+*   **Icons**: [Lucide React](https://lucide.dev/)
+*   **Data Source**: [TMDB API](https://www.themoviedb.org/documentation/api)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup Instructions
 
-## Learn More
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/richaross/movieMatchmaker.git
+    cd movieMatchmaker
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.  **Configure Environment Variables**:
+    Create a `.env.local` file in the root directory and add your TMDB API key:
+    ```env
+    NEXT_PUBLIC_TMDB_API_KEY=your_api_key_here
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-## Deploy on Vercel
+5.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Future Updates
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is actively evolving. Here are the planned features for the next release:
+
+1.  **Review System**: Implementation of a personal review and rating system for movies in the watchlist.
+2.  **Watchlist Filtering**: Advanced filtering and sorting options directly within the `/watchlist` page (e.g., sort by rating, filter by watched status).
+3.  **Watched Status**: A toggle function to mark movies in the watchlist as "Watched" or "Not Yet Watched" to better organize your viewing history.
