@@ -2,6 +2,19 @@
 
 A Tinder-style movie discovery application built with Next.js, Framer Motion, and Tailwind CSS. Users can swipe right to "like" movies (add to watchlist) and swipe left to dismiss them.
 
+## Demos
+
+<div align="center">
+  <h3>Discovery & Swiping</h3>
+  <img src="public/demos/demo-swipe.webp" width="100%" alt="Swipe Demo" />
+
+  <h3>Watch Trailers</h3>
+  <img src="public/demos/demo-trailer.webp" width="100%" alt="Trailer Demo" />
+
+  <h3>Manage Watchlist</h3>
+  <img src="public/demos/demo-watchlist.webp" width="100%" alt="Watchlist Demo" />
+</div>
+
 ## Features
 
 *   **Tinder-Style Swiping**: Intuitive gesture-based interface for browsing movies.
@@ -24,8 +37,8 @@ A Tinder-style movie discovery application built with Next.js, Framer Motion, an
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/richaross/movieMatchmaker.git
-    cd movieMatchmaker
+    git clone https://github.com/richaross/moviematcher.git
+    cd moviematcher
     ```
 
 2.  **Install dependencies**:

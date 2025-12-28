@@ -3,9 +3,13 @@
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Movie } from '@/lib/api';
 import Image from 'next/image';
-import { Star } from 'lucide-react';
+import { Star, Play } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState } from 'react';
+import TrailerModal from './TrailerModal';
+import { fetchMovieTrailer } from '@/lib/api';
+import { useTrailer } from '@/hooks/useTrailer';
+import { memo } from 'react';
 
 interface MovieCardProps {
     movie: Movie;
@@ -13,9 +17,15 @@ interface MovieCardProps {
     index: number;
 }
 
-export default function MovieCard({ movie, onSwipe, index }: MovieCardProps) {
+function MovieCard({ movie, onSwipe, index }: MovieCardProps) {
     const [exitX, setExitX] = useState<number | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
+    const { isOpen, trailerKey, openTrailer, closeTrailer } = useTrailer();
+
+    const handleWatchTrailer = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        openTrailer(movie.id);
+    };
 
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-25, 25]);
@@ -94,15 +104,26 @@ export default function MovieCard({ movie, onSwipe, index }: MovieCardProps) {
                 </span>
             </motion.div>
 
+            {/* Watch Trailer Button - Top Right */}
+            <button
+                onClick={handleWatchTrailer}
+                className="absolute top-4 right-4 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-all z-30 hover:scale-110 active:scale-95 border border-white/10"
+                title="Watch Trailer"
+            >
+                <Play className="w-6 h-6 fill-white" />
+            </button>
+
             {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-8 z-10 select-none">
-                <div className="flex items-baseline justify-between mb-2">
-                    <h2 className="text-3xl font-bold text-white leading-tight drop-shadow-md">
-                        {movie.title}
-                    </h2>
-                    <span className="text-xl font-medium text-gray-300 ml-2">
-                        {movie.year}
-                    </span>
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-baseline gap-2">
+                        <h2 className="text-3xl font-bold text-white leading-tight drop-shadow-md">
+                            {movie.title}
+                        </h2>
+                        <span className="text-xl font-medium text-gray-300">
+                            {movie.year}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2 mb-4">
@@ -138,6 +159,14 @@ export default function MovieCard({ movie, onSwipe, index }: MovieCardProps) {
                     />
                 </motion.div>
             </div>
-        </motion.div>
+
+            <TrailerModal
+                isOpen={isOpen}
+                onClose={closeTrailer}
+                videoKey={trailerKey}
+            />
+        </motion.div >
     );
 }
+
+export default memo(MovieCard);

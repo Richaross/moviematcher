@@ -59,7 +59,6 @@ export interface FilterOptions {
 
 export async function fetchMovies(page: number = 1, filters?: FilterOptions): Promise<Movie[]> {
     if (!TMDB_API_KEY) {
-        console.warn('TMDB_API_KEY is missing. Returning empty list.');
         return [];
     }
 
@@ -104,7 +103,33 @@ export async function fetchMovies(page: number = 1, filters?: FilterOptions): Pr
             description: movie.overview,
         }));
     } catch (error) {
-        console.error('Error fetching movies:', error);
         return [];
+    }
+}
+
+export async function fetchMovieTrailer(movieId: string): Promise<string | null> {
+    if (!TMDB_API_KEY) return null;
+
+    try {
+        const response = await fetch(
+            `${BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=en-US`
+        );
+
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        const videos = data.results || [];
+
+        // Find the first official trailer on YouTube
+        const trailer = videos.find(
+            (v: any) =>
+                v.site === 'YouTube' &&
+                v.type === 'Trailer'
+        );
+
+        return trailer ? trailer.key : null;
+    } catch (error) {
+        console.error('Error fetching trailer:', error);
+        return null;
     }
 }

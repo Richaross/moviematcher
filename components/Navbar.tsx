@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Film, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { useMovieStore } from '@/store/useMovieStore';
+import Image from 'next/image';
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -13,9 +14,15 @@ export default function Navbar() {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 glass-header h-16 px-4 md:px-8 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 group">
-                {/* <div className="relative w-8 h-8 md:w-10 md:h-10">
-                    <img src="/logo.png" alt="MovieMatcher Logo" className="object-contain w-full h-full" />
-                </div> */}
+                <div className="relative w-8 h-8 md:w-10 md:h-10 text-white">
+                    <Image
+                        src="/logo.png"
+                        alt="MovieMatcher Logo"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 32px, 40px"
+                    />
+                </div>
                 <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent text-lg md:text-xl">
                     MovieMatcher
                 </span>
