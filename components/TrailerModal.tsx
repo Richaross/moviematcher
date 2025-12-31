@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface TrailerModalProps {
     isOpen: boolean;
@@ -11,19 +12,26 @@ interface TrailerModalProps {
 }
 
 export default function TrailerModal({ isOpen, onClose, videoKey }: TrailerModalProps) {
-    // Close on escape key
+    const [mounted, setMounted] = useState(false);
+
     useEffect(() => {
+        const timer = setTimeout(() => setMounted(true), 0);
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('keydown', handleEsc);
+        };
     }, [onClose]);
 
-    return (
+    if (!mounted) return null;
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && videoKey && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center px-4">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -60,6 +68,7 @@ export default function TrailerModal({ isOpen, onClose, videoKey }: TrailerModal
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }

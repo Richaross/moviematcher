@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import MainLayout from '@/components/MainLayout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -10,18 +11,25 @@ export const metadata: Metadata = {
   description: 'Find your next favorite movie.',
 };
 
-export default function RootLayout({
+import { createClient } from '@/utils/supabase/server';
+
+// ... imports
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        <main className="pt-20 min-h-screen container mx-auto px-4 pb-10">
+        <Navbar user={user} />
+        <MainLayout>
           {children}
-        </main>
+        </MainLayout>
       </body>
     </html>
   );

@@ -30,14 +30,17 @@ export function useMovieDeck() {
 
     useEffect(() => {
         if (fetchedMovies.length === 0) {
-            if (isLoaded) setDeck([]);
-            return;
+            const timer = setTimeout(() => {
+                if (isLoaded) setDeck([]);
+            }, 0);
+            return () => clearTimeout(timer);
         }
 
         const remaining = fetchedMovies.filter(
             (m) => !isInWatchlist(m.id) && !isDismissed(m.id)
         );
-        setDeck(remaining);
+        const timer = setTimeout(() => setDeck(remaining), 0);
+        return () => clearTimeout(timer);
     }, [fetchedMovies, isInWatchlist, isDismissed]);
 
     const handleSwipe = (direction: 'left' | 'right', id: string) => {

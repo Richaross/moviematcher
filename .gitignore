@@ -56,3 +56,13 @@ commands.txt
 *.njsproj
 *.sln
 *.sw?
+
+# unused assets
+/unused_assets
+
+# temporary files
+lint_output*.txt
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.gemini/

@@ -4,6 +4,7 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 
 export interface Movie {
     id: string;
+    dbId?: string;
     title: string;
     poster: string;
     year: number;
@@ -24,6 +25,16 @@ interface TMDBMovie {
 
 interface TMDBResponse {
     results: TMDBMovie[];
+}
+
+interface TMDBVideo {
+    key: string;
+    site: string;
+    type: string;
+}
+
+interface TMDBVideoResponse {
+    results: TMDBVideo[];
 }
 
 // Map genre IDs to names (simplified list for now)
@@ -59,30 +70,38 @@ export interface FilterOptions {
 
 export async function fetchMovies(page: number = 1, filters?: FilterOptions): Promise<Movie[]> {
     if (!TMDB_API_KEY) {
+        console.error('TMDB_API_KEY is missing');
         return [];
     }
 
     try {
-        // Base URL with default sort if not provided
-        const sortBy = filters?.sortBy || 'popularity.desc';
-        let url = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=en-US&sort_by=${sortBy}&include_adult=false&include_video=false&page=${page}`;
+        const queryParams = new URLSearchParams({
+            api_key: TMDB_API_KEY,
+            language: 'en-US',
+            sort_by: filters?.sortBy || 'popularity.desc',
+            include_adult: 'false',
+            include_video: 'false',
+            page: page.toString(),
+        });
 
         if (filters) {
             if (filters.genres.length > 0) {
-                url += `&with_genres=${filters.genres.join(',')}`;
+                queryParams.append('with_genres', filters.genres.join(','));
             }
+
             // Year range
-            url += `&primary_release_date.gte=${filters.yearRange[0]}-01-01`;
-            url += `&primary_release_date.lte=${filters.yearRange[1]}-12-31`;
+            queryParams.append('primary_release_date.gte', `${filters.yearRange[0]}-01-01`);
+            queryParams.append('primary_release_date.lte', `${filters.yearRange[1]}-12-31`);
 
             // Rating
-            url += `&vote_average.gte=${filters.minRating}`;
-            url += `&vote_count.gte=100`; // Ensure some reliability
+            queryParams.append('vote_average.gte', filters.minRating.toString());
+            queryParams.append('vote_count.gte', '100'); // Ensure some reliability
 
             // Runtime
-            url += `&with_runtime.lte=${filters.runTime}`;
+            queryParams.append('with_runtime.lte', filters.runTime.toString());
         }
 
+        const url = `${BASE_URL}/discover/movie?${queryParams.toString()}`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -103,6 +122,7 @@ export async function fetchMovies(page: number = 1, filters?: FilterOptions): Pr
             description: movie.overview,
         }));
     } catch (error) {
+        console.error('Error in fetchMovies:', error);
         return [];
     }
 }
@@ -111,20 +131,23 @@ export async function fetchMovieTrailer(movieId: string): Promise<string | null>
     if (!TMDB_API_KEY) return null;
 
     try {
+        const queryParams = new URLSearchParams({
+            api_key: TMDB_API_KEY,
+            language: 'en-US'
+        });
+
         const response = await fetch(
-            `${BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=en-US`
+            `${BASE_URL}/movie/${movieId}/videos?${queryParams.toString()}`
         );
 
         if (!response.ok) return null;
 
-        const data = await response.json();
+        const data: TMDBVideoResponse = await response.json();
         const videos = data.results || [];
 
         // Find the first official trailer on YouTube
         const trailer = videos.find(
-            (v: any) =>
-                v.site === 'YouTube' &&
-                v.type === 'Trailer'
+            (v) => v.site === 'YouTube' && v.type === 'Trailer'
         );
 
         return trailer ? trailer.key : null;

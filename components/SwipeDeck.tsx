@@ -30,16 +30,16 @@ export default function SwipeDeck() {
     return (
         <div className="flex flex-col items-center justify-center min-h-[80vh] w-full relative">
 
-            <button
-                onClick={() => setIsFilterOpen(true)}
-                className="absolute top-0 right-4 z-40 p-3 bg-gray-800/80 backdrop-blur-md rounded-full border border-gray-700 hover:bg-gray-700 transition-colors shadow-lg"
-            >
-                <Filter className="w-6 h-6 text-white" />
-            </button>
-
             <MovieFilters isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
 
             <div className="relative w-full max-w-sm h-[600px]">
+                <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="absolute top-4 left-4 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-all z-[200] hover:scale-110 active:scale-95 border border-white/10"
+                    title="Filter Movies"
+                >
+                    <Filter className="w-6 h-6 text-white" />
+                </button>
                 <AnimatePresence>
                     {deck.map((movie, index) => (
                         <MovieCard
@@ -56,10 +56,12 @@ export default function SwipeDeck() {
                         <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-6">
                             <Play className="w-10 h-10 text-gray-400 ml-1" />
                         </div>
-                        <h3 className="text-2xl font-bold mb-2">That's a wrap!</h3>
-                        <p className="text-gray-400 mb-8">
-                            You've seen all the movies in this batch.
-                        </p>
+                        <div className="text-center py-20 px-4">
+                            <h2 className="text-2xl font-bold text-white mb-4">That&apos;s all for now!</h2>
+                            <p className="text-gray-400 mb-8">
+                                You&apos;ve gone through all the movies matching your filters.
+                            </p>
+                        </div>
 
                         <div className="flex flex-col gap-3 w-full max-w-xs">
                             <button
