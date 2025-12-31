@@ -12,11 +12,11 @@ export default async function DiscoverPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
-            <div className="text-center mb-6">
+            <div className="text-center mb-1">
                 <h1 className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-br from-white to-gray-500 bg-clip-text text-transparent drop-shadow-sm">
                     Discover
                 </h1>
-                <p className="text-gray-400 mb-4">Swipe right to save to watchlist</p>
+                <p className="text-gray-400 mb-1">Swipe right to save to watchlist</p>
             </div>
             <SwipeDeck />
         </div>

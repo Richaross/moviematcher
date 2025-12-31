@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'image.tmdb.org',
+
       },
       {
         protocol: 'https',
@@ -13,6 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devIndicators: false,
 };
 
 export default nextConfig;

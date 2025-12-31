@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchMovies, Movie } from '@/lib/api';
 import { useMovieStore } from '@/store/useMovieStore';
+import { filterDeckMovies } from '@/utils/movieUtils';
 
 export function useMovieDeck() {
     const {
@@ -29,17 +30,14 @@ export function useMovieDeck() {
     }, [filters, currentPage]);
 
     useEffect(() => {
-        if (fetchedMovies.length === 0) {
-            const timer = setTimeout(() => {
-                if (isLoaded) setDeck([]);
-            }, 0);
-            return () => clearTimeout(timer);
-        }
+        // Use pure function for filtering (improves testability)
+        const remaining = filterDeckMovies(fetchedMovies, isInWatchlist, isDismissed);
 
-        const remaining = fetchedMovies.filter(
-            (m) => !isInWatchlist(m.id) && !isDismissed(m.id)
-        );
-        const timer = setTimeout(() => setDeck(remaining), 0);
+        // Use timeout to avoid synchronous setState warning
+        const timer = setTimeout(() => {
+            setDeck(remaining);
+        }, 0);
+
         return () => clearTimeout(timer);
     }, [fetchedMovies, isInWatchlist, isDismissed]);
 

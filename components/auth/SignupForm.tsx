@@ -4,6 +4,7 @@ import { signup } from '@/app/login/actions'
 import { useState } from 'react'
 import { Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { validateSignupInput, passwordRegex } from '@/utils/validation'
 
 export default function SignupForm({ message }: { message?: string }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -15,16 +16,13 @@ export default function SignupForm({ message }: { message?: string }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    // Validation State
-    // Password Validation Regex
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
-
-    // Derived State
-    const emailsMatch = email.length > 0 && confirmEmail.length > 0 && email === confirmEmail;
-    const passwordsMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
-    const passwordValid = passwordRegex.test(password);
-
-    const isFormValid = emailsMatch && passwordsMatch && passwordValid;
+    // Derived State (Pure Function Validation)
+    const { emailsMatch, passwordsMatch, passwordValid, isFormValid } = validateSignupInput(
+        email,
+        confirmEmail,
+        password,
+        confirmPassword
+    );
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-900 text-white p-4">

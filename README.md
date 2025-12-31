@@ -14,6 +14,14 @@ A Tinder-style movie discovery application built with Next.js, Framer Motion, an
 *   **Responsive Design**: Fully optimized for mobile and desktop experiences.
 *   **Glassmorphism UI**: Modern, sleek interface with blur effects and smooth animations.
 
+## Screenshots
+
+![Discover Page](./public/screenshot_discover.png)
+
+*This product uses the TMDB API but is not endorsed or certified by TMDB. Movie posters and data are provided by [The Movie Database (TMDB)](https://www.themoviedb.org/).*
+
+<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="TMDB Logo" width="100"/>
+
 ## Code Architecture & Quality
 
 The codebase has been strictly refactored for clarity, scalability, and maintainability (Dec 2025):
