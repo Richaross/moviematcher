@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Movie } from '@/lib/api';
 import { addToWatchlist, removeFromWatchlist, getWatchlist } from '@/app/actions/watchlist';
+import { toggleWatched as toggleWatchedAction } from '@/app/actions/toggleWatched'; // Preserving this import seen in logs
+import { WatchlistFilter } from '@/utils/watchlistUtils';
+import { deduplicateMovies } from '@/utils/movieUtils';
 
 // --- Types ---
 
@@ -17,7 +20,8 @@ interface MovieState {
     // Data
     watchlist: Movie[];
     dismissed: string[];
-    filters: FilterState;
+    filters: FilterState; // Discover filters
+    watchlistFilter: WatchlistFilter; // Watchlist filters
     currentPage: number;
     userId: string | null;
 
@@ -25,6 +29,9 @@ interface MovieState {
     fetchWatchlist: () => Promise<void>;
     addToWatchlist: (movie: Movie) => Promise<void>;
     removeFromWatchlist: (movieId: string) => Promise<void>;
+    toggleWatched: (movieId: string) => Promise<void>;
+    setReview: (movieId: string, review: string, rating: number) => Promise<void>;
+    clearReview: (movieId: string) => Promise<void>;
 
     // Sync Actions (UI State)
     initializeForUser: (userId: string) => void;
@@ -32,6 +39,7 @@ interface MovieState {
     isInWatchlist: (movieId: string) => boolean;
     isDismissed: (movieId: string) => boolean;
     setFilters: (filters: FilterState) => void;
+    setWatchlistFilter: (filter: Partial<WatchlistFilter>) => void;
     nextPage: () => void;
     resetPage: () => void;
     resetStore: () => void;
@@ -54,16 +62,18 @@ export const useMovieStore = create<MovieState>()(
                 sortBy: 'popularity.desc',
                 runTime: 180,
             },
+            watchlistFilter: {
+                search: '',
+                watched: 'all',
+                sortBy: 'title',
+            },
 
             // --- Async Actions ---
 
             fetchWatchlist: async () => {
                 try {
                     const movies = await getWatchlist();
-                    // De-duplicate based on ID
-                    const uniqueMovies = Array.from(
-                        new Map(movies.map(m => [m.id, m])).values()
-                    );
+                    const uniqueMovies = deduplicateMovies(movies);
                     set({ watchlist: uniqueMovies });
                 } catch (error) {
                     console.error('Failed to fetch watchlist:', error);
@@ -117,6 +127,79 @@ export const useMovieStore = create<MovieState>()(
                 }
             },
 
+            toggleWatched: async (movieId) => {
+                const movie = get().watchlist.find(m => m.id === movieId);
+                if (!movie) return;
+
+                const originalWatched = movie.watched || false;
+                const newWatched = !originalWatched;
+
+                // 1. Optimistic Update
+                set((state) => ({
+                    watchlist: state.watchlist.map((m) =>
+                        m.id === movieId ? { ...m, watched: newWatched } : m
+                    ),
+                }));
+
+                // 2. DB Sync
+                try {
+                    if (movie.dbId) {
+                        await toggleWatchedAction(movie.dbId, newWatched);
+                    }
+                } catch (error) {
+                    console.error('Failed to toggle watched status:', error);
+                    // 3. Rollback
+                    set((state) => ({
+                        watchlist: state.watchlist.map((m) =>
+                            m.id === movieId ? { ...m, watched: originalWatched } : m
+                        ),
+                    }));
+                }
+            },
+
+            setReview: async (movieId, review, rating) => {
+                // 1. Optimistic Update
+                const previousWatchlist = get().watchlist;
+                set((state) => ({
+                    watchlist: state.watchlist.map((m) =>
+                        m.id === movieId ? { ...m, review, userRating: rating } : m
+                    )
+                }));
+
+                // 2. DB Sync
+                try {
+                    const { setReview } = await import('@/app/actions/review');
+                    await setReview(movieId, review, rating);
+                } catch (error) {
+                    console.error('Failed to save review:', error);
+                    // 3. Rollback
+                    set({ watchlist: previousWatchlist });
+                }
+            },
+
+            clearReview: async (movieId) => {
+                // 1. Optimistic Update
+                const previousWatchlist = get().watchlist;
+                set((state) => ({
+                    watchlist: state.watchlist.map((m) => {
+                        if (m.id === movieId) {
+                            const { review, userRating, ...rest } = m;
+                            return rest;
+                        }
+                        return m;
+                    })
+                }));
+
+                // 2. DB Sync
+                try {
+                    const { setReview } = await import('@/app/actions/review');
+                    await setReview(movieId, '', 0);
+                } catch (error) {
+                    console.error('Failed to clear review:', error);
+                    set({ watchlist: previousWatchlist });
+                }
+            },
+
             // --- Sync Actions ---
 
             initializeForUser: (userId: string) => {
@@ -143,6 +226,11 @@ export const useMovieStore = create<MovieState>()(
 
             setFilters: (filters) => set({ filters, currentPage: 1 }),
 
+            setWatchlistFilter: (filter) =>
+                set((state) => ({
+                    watchlistFilter: { ...state.watchlistFilter, ...filter }
+                })),
+
             nextPage: () => set((state) => ({ currentPage: state.currentPage + 1 })),
 
             resetPage: () => set({ currentPage: 1 }),
@@ -151,15 +239,20 @@ export const useMovieStore = create<MovieState>()(
                 watchlist: [],
                 dismissed: [],
                 currentPage: 1,
-                userId: null
+                userId: null,
+                watchlistFilter: {
+                    search: '',
+                    watched: 'all',
+                    sortBy: 'title',
+                }
             }),
         }),
         {
-            name: 'movie-matchmaker-storage-v4', // Version bump for structural changes
+            name: 'movie-matchmaker-storage-v5', // Increment version
             partialize: (state) => ({
                 dismissed: state.dismissed,
                 filters: state.filters,
-                // Do not persist watchlist or userId deeply, trust auth/server sync on load
+                watchlistFilter: state.watchlistFilter,
             }),
         }
     )

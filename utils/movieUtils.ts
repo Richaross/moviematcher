@@ -13,3 +13,13 @@ export function filterDeckMovies(
         (m) => !isInWatchlist(m.id) && !isDismissed(m.id)
     );
 }
+
+/**
+ * Removes duplicate movies from an array based on their ID.
+ * Keeps the last occurrence if duplicates exist, based on Map behavior.
+ */
+export function deduplicateMovies(movies: Movie[]): Movie[] {
+    return Array.from(
+        new Map(movies.map(m => [m.id, m])).values()
+    );
+}

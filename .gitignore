@@ -52,7 +52,7 @@ yarn-error.log*
 *.sw?
 
 # unused assets
-/unused_assets
+
 
 # temporary files
 lint_output*.txt

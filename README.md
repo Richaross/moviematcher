@@ -13,6 +13,9 @@ A Tinder-style movie discovery application built with Next.js, Framer Motion, an
 *   **Watchlist Management**: View, manage, and remove movies from your saved list.
 *   **Responsive Design**: Fully optimized for mobile and desktop experiences.
 *   **Glassmorphism UI**: Modern, sleek interface with blur effects and smooth animations.
+*   **Personal Reviews**: Rate (0-10) and review movies in your watchlist to track your thoughts.
+*   **Deep Filtering**: Sort your watchlist by rating, date added, or title, and filter by "Watched" status.
+*   **Viewing History**: Mark movies as watched to separate your "To Watch" list from your history.
 
 ## Screenshots
 
@@ -83,10 +86,4 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Future Updates
 
-This project is actively evolving. Here are the planned features for the next release:
-
-1.  **Review System**: Implementation of a personal review and rating system for movies in the watchlist.
-2.  **Watchlist Filtering**: Advanced filtering and sorting options directly within the `/watchlist` page (e.g., sort by rating, filter by watched status).
-3.  **Watched Status**: A toggle function to mark movies in the watchlist as "Watched" or "Not Yet Watched" to better organize your viewing history.

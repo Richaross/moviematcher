@@ -11,6 +11,9 @@ export interface Movie {
     genre: string[];
     rating: number;
     description: string;
+    watched?: boolean;
+    review?: string;
+    userRating?: number;
 }
 
 interface TMDBMovie {
