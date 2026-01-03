@@ -1,11 +1,11 @@
 ---
-description: Perform a second, constrained refactoring pass on the following codebase to refine design clarity, dependency boundaries, and testability, while strictly preserving all behavior, contracts, and structure introduced in the previous refactor.
+description: Perform a constrained refactoring pass on the following codebase to refine design clarity, dependency boundaries, and testability, while strictly preserving all behavior, contracts, and structure introduced in the previous refactor.
 ---
 
 Antigravity Refactoring Prompt — Iteration 2
 
 Task
-Perform a second, constrained refactoring pass on the following codebase to refine design clarity, dependency boundaries, and testability, while strictly preserving all behavior, contracts, and structure introduced in the previous refactor.
+Perform a constrained refactoring pass on the following codebase to refine design clarity, dependency boundaries, and testability, while strictly preserving all behavior, contracts, and structure introduced in the previous refactor.
 
 This is a design refinement pass, not a structural rewrite.
 

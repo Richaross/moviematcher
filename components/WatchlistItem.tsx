@@ -13,6 +13,7 @@ import TrailerModal from './TrailerModal';
 import { hasUserReview } from '@/utils/watchlistUtils';
 import MovieDetailsModal from './MovieDetailsModal';
 import { Info } from 'lucide-react'; // Import Info icon
+import { useCardInteraction } from '@/hooks/useCardInteraction';
 
 
 interface WatchlistItemProps {
@@ -29,6 +30,9 @@ export function WatchlistItem({ movie, isSelectionMode = false, isSelected = fal
     const [review, setReviewText] = useState(movie.review || '');
     const [isSaving, setIsSaving] = useState(false);
     const [isInfoOpen, setIsInfoOpen] = useState(false); // State for modal
+
+    // Extract interaction logic to hook
+    const { isOverlayVisible, handleCardClick } = useCardInteraction(isSelectionMode, onToggleSelect);
 
     // Trailer state
     const { isOpen, trailerKey, openTrailer, closeTrailer } = useTrailer();
@@ -63,11 +67,7 @@ export function WatchlistItem({ movie, isSelectionMode = false, isSelected = fal
 
 
     // Handle card click for selection
-    const handleCardClick = () => {
-        if (isSelectionMode && onToggleSelect) {
-            onToggleSelect();
-        }
-    };
+
 
     const handleWatchTrailer = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -125,8 +125,14 @@ export function WatchlistItem({ movie, isSelectionMode = false, isSelected = fal
                     )}
 
                     {/* Overlay Actions (Only when NOT in selection mode) */}
+
                     {!isSelectionMode && (
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 z-10 p-4">
+                        <div className={cn(
+                            "absolute inset-0 bg-black/60 transition-opacity duration-300 flex items-center justify-center gap-4 z-10 p-4",
+                            isOverlayVisible
+                                ? "opacity-100 pointer-events-auto"
+                                : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                        )}>
                             {/* Watched Toggle */}
                             <button
                                 onClick={(e) => { e.stopPropagation(); toggleWatched(movie.id); }}
