@@ -2,6 +2,7 @@
 
 A Tinder-style movie discovery application built with Next.js, Framer Motion, and Tailwind CSS. Users can swipe right to "like" movies (add to watchlist) and swipe left to dismiss them.
 
+Developed using a robust **Test-Driven Development (TDD)** framework, this project leverages **Vitest** and **React Testing Library** to verify core functionality—ensuring reliability from the swipe deck to the backend database.
 
 ## Features
 
@@ -16,6 +17,20 @@ A Tinder-style movie discovery application built with Next.js, Framer Motion, an
 *   **Personal Reviews**: Rate (0-10) and review movies in your watchlist to track your thoughts.
 *   **Deep Filtering**: Sort your watchlist by rating, date added, or title, and filter by "Watched" status.
 *   **Viewing History**: Mark movies as watched to separate your "To Watch" list from your history.
+*   **Bulk Selection**: Select multiple movies in your watchlist to delete or mark them as watched/unwatched in bulk. 
+
+## Project History
+
+*   **2026-01-03**: Implemented bulk selection for watchlist management.
+*   **2026-01-03**: Further improvement of test coverage.
+*   **2026-01-01**: Added movie review system with 0-10 rating scale.
+*   **2026-01-01**: Refactored watchlist UI controls to use filter chips.
+*   **2025-12-31**: Implement core movie swiping, filtering, and authentication features with Supabase and Vitest, alongside new UI components and testing infrastructure (TDD).
+*   **2025-12-30**: Implemented backend structure with Supabase to store user data online.
+*   **2025-12-30**: Refined UI layering and z-index issues.
+*   **2025-12-28**: Implemented movie trailer playback feature.
+*   **2025-12-28**: Added application logo to navbar.
+*   **2025-12-19**: Initial project setup and "Movie Matchmaker" branding.
 
 ## Screenshots
 
