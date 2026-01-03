@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { Movie } from '@/lib/api';
 import { addToWatchlist, removeFromWatchlist, getWatchlist } from '@/app/actions/watchlist';
 import { toggleWatched as toggleWatchedAction } from '@/app/actions/toggleWatched'; // Preserving this import seen in logs
-import { WatchlistFilter } from '@/utils/watchlistUtils';
+import { WatchlistFilter, DEFAULT_WATCHLIST_FILTER } from '@/utils/watchlistUtils';
 import { deduplicateMovies } from '@/utils/movieUtils';
 
 // --- Types ---
@@ -25,6 +25,10 @@ interface MovieState {
     currentPage: number;
     userId: string | null;
 
+    // Selection State
+    isSelectionMode: boolean;
+    selectedMovieIds: string[];
+
     // Async Actions (Side Effects)
     fetchWatchlist: () => Promise<void>;
     addToWatchlist: (movie: Movie) => Promise<void>;
@@ -32,6 +36,8 @@ interface MovieState {
     toggleWatched: (movieId: string) => Promise<void>;
     setReview: (movieId: string, review: string, rating: number) => Promise<void>;
     clearReview: (movieId: string) => Promise<void>;
+    removeMultipleFromWatchlist: (movieIds: string[]) => Promise<void>;
+    markMultipleAsWatched: (movieIds: string[], watched: boolean) => Promise<void>;
 
     // Sync Actions (UI State)
     initializeForUser: (userId: string) => void;
@@ -40,6 +46,13 @@ interface MovieState {
     isDismissed: (movieId: string) => boolean;
     setFilters: (filters: FilterState) => void;
     setWatchlistFilter: (filter: Partial<WatchlistFilter>) => void;
+
+    // Selection Actions
+    toggleSelectionMode: () => void;
+    toggleMovieSelection: (id: string) => void;
+    selectAll: () => void;
+    clearSelection: () => void;
+
     nextPage: () => void;
     resetPage: () => void;
     resetStore: () => void;
@@ -62,11 +75,9 @@ export const useMovieStore = create<MovieState>()(
                 sortBy: 'popularity.desc',
                 runTime: 180,
             },
-            watchlistFilter: {
-                search: '',
-                watched: 'all',
-                sortBy: 'title',
-            },
+            watchlistFilter: { ...DEFAULT_WATCHLIST_FILTER },
+            isSelectionMode: false,
+            selectedMovieIds: [],
 
             // --- Async Actions ---
 
@@ -200,6 +211,59 @@ export const useMovieStore = create<MovieState>()(
                 }
             },
 
+
+            removeMultipleFromWatchlist: async (movieIds) => {
+                // 1. Optimistic Update
+                const previousWatchlist = get().watchlist;
+                set((state) => ({
+                    watchlist: state.watchlist.filter((m) => !movieIds.includes(m.id))
+                }));
+
+                // 2. DB Sync
+                try {
+                    // Filter out movies that don't have a DB ID yet (optimistic only)
+                    const moviesToRemove = previousWatchlist.filter(m => movieIds.includes(m.id) && m.dbId);
+                    const dbIds = moviesToRemove.map(m => m.dbId as string);
+
+                    if (dbIds.length > 0) {
+                        // We'll need a specialized server action for bulk delete to be efficient,
+                        // but for now, we can loop (or better, add a bulk action later).
+                        // Let's iterate for MVP compliance with existing actions.
+                        // Ideally, we should implement a `removeMultiple` server action.
+                        // For this iteration, I will use `Promise.all` with existing single-item action.
+                        await Promise.all(dbIds.map(id => removeFromWatchlist(id)));
+                    }
+                } catch (error) {
+                    console.error('Failed to bulk remove:', error);
+                    // 3. Rollback
+                    set({ watchlist: previousWatchlist });
+                }
+            },
+
+            markMultipleAsWatched: async (movieIds, watched) => {
+                // 1. Optimistic Update
+                const previousWatchlist = get().watchlist;
+                set((state) => ({
+                    watchlist: state.watchlist.map(m =>
+                        movieIds.includes(m.id) ? { ...m, watched } : m
+                    )
+                }));
+
+                // 2. DB Sync
+                try {
+                    const moviesToUpdate = previousWatchlist.filter(m => movieIds.includes(m.id) && m.dbId);
+
+                    await Promise.all(moviesToUpdate.map(m =>
+                        toggleWatchedAction(m.dbId!, watched)
+                    ));
+
+                } catch (error) {
+                    console.error('Failed to bulk update watched status:', error);
+                    set({ watchlist: previousWatchlist });
+                }
+            },
+
+
             // --- Sync Actions ---
 
             initializeForUser: (userId: string) => {
@@ -231,6 +295,27 @@ export const useMovieStore = create<MovieState>()(
                     watchlistFilter: { ...state.watchlistFilter, ...filter }
                 })),
 
+            // Selection Actions
+            toggleSelectionMode: () => set((state) => ({
+                isSelectionMode: !state.isSelectionMode,
+                selectedMovieIds: [] // Clear selection when toggling off/on
+            })),
+
+            toggleMovieSelection: (id) => set((state) => {
+                const isSelected = state.selectedMovieIds.includes(id);
+                return {
+                    selectedMovieIds: isSelected
+                        ? state.selectedMovieIds.filter(mid => mid !== id)
+                        : [...state.selectedMovieIds, id]
+                };
+            }),
+
+            selectAll: () => set((state) => ({
+                selectedMovieIds: state.watchlist.map(m => m.id)
+            })),
+
+            clearSelection: () => set({ selectedMovieIds: [] }),
+
             nextPage: () => set((state) => ({ currentPage: state.currentPage + 1 })),
 
             resetPage: () => set({ currentPage: 1 }),
@@ -240,11 +325,7 @@ export const useMovieStore = create<MovieState>()(
                 dismissed: [],
                 currentPage: 1,
                 userId: null,
-                watchlistFilter: {
-                    search: '',
-                    watched: 'all',
-                    sortBy: 'title',
-                }
+                watchlistFilter: { ...DEFAULT_WATCHLIST_FILTER }
             }),
         }),
         {
@@ -257,3 +338,4 @@ export const useMovieStore = create<MovieState>()(
         }
     )
 );
+

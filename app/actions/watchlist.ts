@@ -12,6 +12,18 @@ export async function addToWatchlist(movie: Movie) {
         throw new Error('User not authenticated')
     }
 
+    // Check if movie already exists in watchlist
+    const { data: existingEntry } = await supabase
+        .from('watchlists')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('movie_id', movie.id)
+        .maybeSingle()
+
+    if (existingEntry) {
+        return existingEntry.id
+    }
+
     const { data, error } = await supabase
         .from('watchlists')
         .insert({

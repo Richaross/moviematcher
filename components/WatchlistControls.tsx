@@ -5,7 +5,7 @@ import { useMovieStore } from '@/store/useMovieStore';
 import { Search, X, Check, ArrowUpDown, Clock, Star, Type } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WatchstatusFilter, WatchlistSortKey } from '@/utils/watchlistUtils'; // Explicitly importing types for safety if available
+import { WatchstatusFilter, WatchlistSortKey, isFilterActive } from '@/utils/watchlistUtils'; // Explicitly importing types for safety if available
 
 type FilterChipProps = {
     label: string;
@@ -32,7 +32,17 @@ function FilterChip({ label, active, onClick, icon }: FilterChipProps) {
 }
 
 export default function WatchlistControls() {
-    const { watchlistFilter, setWatchlistFilter } = useMovieStore();
+    const {
+        watchlistFilter,
+        setWatchlistFilter,
+        isSelectionMode,
+        toggleSelectionMode,
+        selectedMovieIds,
+        selectAll,
+        clearSelection,
+        removeMultipleFromWatchlist,
+        markMultipleAsWatched
+    } = useMovieStore();
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Handlers
@@ -47,13 +57,48 @@ export default function WatchlistControls() {
     };
 
     // Filter Helpers
-    const isWatched = (val: string) => (watchlistFilter?.watched || 'all') === val;
-    const isSort = (val: string) => (watchlistFilter?.sortBy || 'title') === val;
+    const isWatched = (val: string) => isFilterActive(watchlistFilter?.watched || 'all', val);
+    const isSort = (val: string) => isFilterActive(watchlistFilter?.sortBy || 'title', val);
 
     return (
         <div className="mb-8 relative z-20">
             {/* Scrollable Container */}
             <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
+
+                {/* Selection Toggle */}
+                <button
+                    onClick={toggleSelectionMode}
+                    className={clsx(
+                        "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border shrink-0",
+                        isSelectionMode
+                            ? "bg-red-900/50 text-red-200 border-red-700 hover:bg-red-800/50"
+                            : "bg-gray-800/50 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-gray-200"
+                    )}
+                >
+                    {isSelectionMode ? (
+                        <>
+                            <X className="w-4 h-4" />
+                            Cancel
+                        </>
+                    ) : (
+                        <>
+                            <Check className="w-4 h-4" />
+                            Select
+                        </>
+                    )}
+                </button>
+
+                {isSelectionMode && (
+                    <button
+                        onClick={selectAll}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border shrink-0 bg-gray-800/50 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-gray-200"
+                    >
+                        Select All
+                    </button>
+                )}
+
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-6 bg-gray-800 shrink-0" />
 
                 {/* Search Input (Always Visible) */}
                 <div className="relative flex items-center min-w-[200px] sm:min-w-[250px]">
@@ -126,3 +171,4 @@ export default function WatchlistControls() {
         </div>
     );
 }
+

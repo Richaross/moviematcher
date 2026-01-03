@@ -11,7 +11,8 @@ export function useMovieDeck() {
         currentPage,
         addToWatchlist,
         dismissMovie,
-        nextPage
+        nextPage,
+        watchlist // Add watchlist to destructuring
     } = useMovieStore();
 
     const [fetchedMovies, setFetchedMovies] = useState<Movie[]>([]);
@@ -39,7 +40,7 @@ export function useMovieDeck() {
         }, 0);
 
         return () => clearTimeout(timer);
-    }, [fetchedMovies, isInWatchlist, isDismissed]);
+    }, [fetchedMovies, isInWatchlist, isDismissed, watchlist]); // Add watchlist to dependency
 
     const handleSwipe = (direction: 'left' | 'right', id: string) => {
         const movie = deck.find((m) => m.id === id);

@@ -13,6 +13,21 @@ export interface WatchlistFilter {
 // In the future this might be part of the core Movie type
 export type WatchlistMovie = Movie & { watched?: boolean };
 
+export const DEFAULT_WATCHLIST_FILTER: WatchlistFilter = {
+    search: '',
+    watched: 'all',
+    sortBy: 'title',
+};
+
+export function hasUserReview(movie: Movie): boolean {
+    return (!!movie.review && movie.review.length > 0) || (movie.userRating !== undefined && movie.userRating > 0);
+}
+
+export function isFilterActive<T>(current: T | undefined, target: T): boolean {
+    return current === target;
+}
+
+
 export function filterWatchlist(
     items: WatchlistMovie[],
     filters: WatchlistFilter
